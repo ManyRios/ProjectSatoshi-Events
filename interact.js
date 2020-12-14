@@ -81,9 +81,12 @@ const abi = [
 
 const web3 = new Web3(Web3.currentProvider ||'https://data-seed-prebsc-1-s1.binance.org:8545');//Binance Smart Chain Testnet network
 
-contract = new web3.eth.Contract( abi, contractAddress );
+contract = new web3.eth.Contract( abi, contractAddress ); //contract instance
 
+//when html is ready
 document.addEventListener('DOMContentLoaded', ()=>{
+	
+	// function for send transactions 
 	async function test(){
 		console.log('provider' + Web3.currentProvider )
         console.log('cuenta: '+ web3.eth.accounts.wallet)
@@ -100,7 +103,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
 		
 		console.log('account wallet ' + web3.eth.accounts.wallet);
 	}
-
+		
+	
+		//function for check the balance of an address on BSC
 	document.getElementById('checkBalance').addEventListener('click', async function getbalances(e){
 		e.preventDefault();
 		let holder = document.querySelector('#balance').value;
@@ -113,6 +118,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 		
 	});
 	
+	//Interact with a function from the smart contract 
 	document.querySelector('#checkInstructor').addEventListener('click', async function instructor(e){
 		e.preventDefault();
 		contract.methods.getInstructor().call().then( ( res )=>{
