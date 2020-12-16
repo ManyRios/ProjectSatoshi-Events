@@ -1,5 +1,6 @@
-
+//Contract address from deployed contract in remix
 const contractAddress = '0xA40D097d3C601798403caD0D9AFC018fadb2eE85';
+// ABI from compiled contract in remix
 const abi = [
 	{
 		"constant": false,
@@ -79,6 +80,8 @@ const abi = [
 	}
 ]
 
+
+//Setting the provider for web3, in this case for Binance Smart Chain 
 const web3 = new Web3(Web3.currentProvider ||'https://data-seed-prebsc-1-s1.binance.org:8545');//Binance Smart Chain Testnet network
 
 contract = new web3.eth.Contract( abi, contractAddress ); //contract instance
@@ -86,7 +89,7 @@ contract = new web3.eth.Contract( abi, contractAddress ); //contract instance
 //when html is ready
 document.addEventListener('DOMContentLoaded', ()=>{
 	
-	// function for send transactions 
+	// function for send transactions
 	async function test(){
 		console.log('provider' + Web3.currentProvider )
         console.log('cuenta: '+ web3.eth.accounts.wallet)
@@ -107,7 +110,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 	
 		//function for check the balance of an address on BSC
 	document.getElementById('checkBalance').addEventListener('click', async function getbalances(e){
-		e.preventDefault();
+		e.preventDefault(); //When a user make a click it prevents the refreshing of the page
 		let holder = document.querySelector('#balance').value;
 		let balance = document.querySelector('.balancevalue');
 		await web3.eth.getBalance(String(holder)).then( (res) =>{
