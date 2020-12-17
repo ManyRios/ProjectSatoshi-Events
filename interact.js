@@ -1,32 +1,38 @@
-//Contract address from deployed contract in remix
-const contractAddress = '0xA40D097d3C601798403caD0D9AFC018fadb2eE85';
-// ABI from compiled contract in remix
-const abi = [
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_fName",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_age",
-				"type": "uint256"
-			}
-		],
-		"name": "setInstructor",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
+//Initialize web3 and connect to metamask and takes the provider. Int his case we're using testnet or 'https://data-seed-prebsc-1-s1.binance.org:8545' 
+web3 = new Web3(web3.currentProvider);   
+
+    //This is the abi of the Smart Contract, taken from the compiled contract in remix
+    let abi = [
 	{
 		"inputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
 		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_age",
+				"type": "uint256"
+			}
+		],
+		"name": "Sent",
+		"type": "event"
 	},
 	{
 		"constant": true,
@@ -77,71 +83,112 @@ const abi = [
 		"payable": false,
 		"stateMutability": "view",
 		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_fName",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_age",
+				"type": "uint256"
+			}
+		],
+		"name": "setInstructor",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
 	}
 ]
+ 
+ //Contract Address taken from deployed contract in remix
+ const contractAddress = '0x8b3f69fA9ccD963AC0564f8afAd76585B23e3Ef4';
+    
+//Initialize the contract with the ABI and contract address information 
+ contract = new web3.eth.Contract( abi, contractAddress );
 
-
-//Setting the provider for web3, in this case for Binance Smart Chain 
-const web3 = new Web3(Web3.currentProvider ||'https://data-seed-prebsc-1-s1.binance.org:8545');//Binance Smart Chain Testnet network
-
-contract = new web3.eth.Contract( abi, contractAddress ); //contract instance
-
-//when html is ready
-document.addEventListener('DOMContentLoaded', ()=>{
-	
-	// function for send transactions
-	async function test(){
-		console.log('provider' + Web3.currentProvider )
-        console.log('cuenta: '+ web3.eth.accounts.wallet)
-	   
-		await web3.eth.sendTransaction({
-            from: web3.eth.accounts.wallet
-        }, function(err, transactionHash) {
-          if (err) {
-            console.log(err);
-            } else {
-            console.log(transactionHash);
-           }
-		});
-		
-		console.log('account wallet ' + web3.eth.accounts.wallet);
-	}
-		
-	
-		//function for check the balance of an address on BSC
-	document.getElementById('checkBalance').addEventListener('click', async function getbalances(e){
-		e.preventDefault(); //When a user make a click it prevents the refreshing of the page
-		let holder = document.querySelector('#balance').value;
-		let balance = document.querySelector('.balancevalue');
-		await web3.eth.getBalance(String(holder)).then( (res) =>{
-			console.log(res);
-			balance.innerHTML = ( ' ' + res + ' BNB');
-		}); 
-
-		
-	});
-	
-	//Interact with a function from the smart contract 
-	document.querySelector('#checkInstructor').addEventListener('click', async function instructor(e){
-		e.preventDefault();
-		contract.methods.getInstructor().call().then( ( res )=>{
-			console.log(res);
-			document.querySelector('.instruct').innerHTML = ( ' Name: ' + res[0] + ', Age: ' + res[1] )
-		}) 
-	})
-
-
-
-
-
-
-})
-
-
-
-
-/*
-    */
+//When the DOM load all the elemtens this functions start 
+document.addEventListener('DOMContentLoaded', async ()=>{
+ 
+	//returns array of address in metamask wallet
    
-    //getBalance('0xaF3D6A4EE567e89aa0Fa0770FCc8Ab3e65518096');
+    let accounts = await web3.eth.getAccounts();
+  
+  //Set userAccount to first Address in our metamask wallet 
+    let userAccount = accounts[0];
+  
 
+  //This shows in console the user account of the owner
+  console.log(userAccount, 'user account');
+  
+  //function for check the balance of an address on BSC
+	const checkBalance = async (e)=>{	
+    let holder = document.querySelector('#balance').value; //it takes the address pasted by the user
+		let balance = document.querySelector('.balancevalue');//will show in a label the amount of the balance
+ 
+		await web3.eth.getBalance(holder).then( (res) =>{
+			console.log(res, ' this is the balance');
+			balance.innerHTML = ( res +  ' BNB'); 
+		});	
+	};
+  
+  	//when the user makes a click in the button the function will return the values
+	const instructor = async (e)=>{
+	 
+		let res = await contract.methods.getInstructor().call()
+			console.log(res);
+    //Set in html label the values of name and age, they cames as an array, then we ask for them in res[0] and res[1] positions
+			document.querySelector('.instruct').innerHTML = ( ' Name: '+ res[0]+ ', Age: '+ res[1] ) 
+		
+	}
+  
+  //Set values to the smart contract to the variables name and age of the instructor 
+  const setInstructor = async (e)=>{
+      //declare variable name from a element of the html
+      let name = document.querySelector('#name').value;
+    //declare variable age from a element of the html
+      let age = document.querySelector('#age').value;
+      console.log(name, ' ', age);
+     //Send the variables values declared before to our smart contract function setInstructor
+      let receiver = await contract.methods.setInstructor(name,age).send({from:        userAccount});
+    //declare a variable from an html element to show the result in there
+      let hash = document.querySelector('#hash')
+      //set the attribute for hash,  to show watch the txhash on bscscan
+      hash.setAttribute('href', "https://testnet.bscscan.com/tx/" + receiver.transactionHash)
+     // show the txhash on the html
+      hash.innerHTML = ' ' + receiver.transactionHash
+      console.log(receiver.transactionHash, ' txt');
+  }
+  
+  //This event, listen for any click in the DOM 
+  document.addEventListener('click', async (e) =>{
+    e.preventDefault(); //prevent the default refresh of the browser when the user makes a click
+    //variable to take the name of the clicked element, to do an action depending of its property name
+    let target = e.path[0].name;
+    console.log(target, " target");
+    //here we compare each name of the clicked element
+   if(target === "checkBalance"){
+      checkBalance();//call the function checkBalance if the name of the clicked element is equal to "checkBalance"
+    }else if(target === "checkInstructor"){
+      instructor();//call the function instructor if the name of the clicked element is equal to "instructor"
+    }else if(target === "setValues"){
+      setInstructor();//call the function setInstructor if the name of the clicked element is equal to "setInstructor"
+    } 
+  })
+  
+  
+ });
+ 
+		
+	
+
+ 
+
+
+    
+    
